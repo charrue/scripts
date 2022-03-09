@@ -12,10 +12,6 @@
   "bin": {
     "petros": "outfile.cjs"
   },
-  "keywords": [
-    "typescript",
-    "rollup"
-  ],
   "dependencies": {
     "@charrue/toolkit": "^0.3.0",
     "cac": "^6.7.12",
@@ -60,5 +56,20 @@
   "lint-staged": {
     "*.ts": "npm run lint"
   },
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/",
+    "access": "public"
+  },
+  "keywords": [
+    "typescript",
+    "rollup",
+    "charrue",
+    "cli"
+  ],
+  "files": [
+    "dist",
+    "outfile.cjs",
+    "README.md"
+  ],
   "license": "MIT"
 }

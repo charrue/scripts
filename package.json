@@ -1,0 +1,62 @@
+{
+  "version": "0.0.1",
+  "name": "@charrue/petros",
+  "description": "",
+  "scripts": {
+    "prepare": "husky install",
+    "build:cli": "esbuild --minify --bundle src/cli.ts --format=cjs --platform=node --outfile=outfile.cjs",
+    "lint": "eslint --fix",
+    "test": "vitest"
+  },
+  "bin": {
+    "petros": "outfile.cjs"
+  },
+  "keywords": [
+    "typescript",
+    "rollup"
+  ],
+  "dependencies": {
+    "@charrue/toolkit": "^0.3.0",
+    "cac": "^6.7.12",
+    "zlib": "^1.0.5"
+  },
+  "devDependencies": {
+    "@babel/eslint-parser": "^7.16.3",
+    "@charrue/eslint-config-base": "^0.1.3",
+    "@commitlint/cli": "^15.0.0",
+    "@commitlint/config-conventional": "^15.0.0",
+    "@rollup/plugin-commonjs": "^21.0.1",
+    "@rollup/plugin-node-resolve": "^13.1.3",
+    "@types/connect": "^3.4.35",
+    "@types/cors": "^2.8.12",
+    "@typescript-eslint/eslint-plugin": "^5.5.0",
+    "@typescript-eslint/parser": "^5.5.0",
+    "commitizen": "^4.2.4",
+    "connect": "^3.7.0",
+    "cors": "^2.8.5",
+    "esbuild": "^0.14.1",
+    "eslint": "^8.3.0",
+    "husky": "^7.0.4",
+    "kolorist": "^1.5.1",
+    "lint-staged": "^12.1.2",
+    "open": "^8.4.0",
+    "rimraf": "^3.0.2",
+    "rollup": "^2.60.2",
+    "rollup-plugin-dts": "^4.0.1",
+    "rollup-plugin-esbuild": "^4.7.2",
+    "sirv": "^2.0.2",
+    "tslib": "^2.3.1",
+    "typescript": "^4.5.2",
+    "vite": "^2.8.1",
+    "vitest": "^0.3.2"
+  },
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-conventional-changelog"
+    }
+  },
+  "lint-staged": {
+    "*.ts": "npm run lint"
+  },
+  "license": "MIT"
+}

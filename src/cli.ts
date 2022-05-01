@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 
 import cac from "cac";
-import { initCommitLintPreset } from "./command/preset/commitlint";
+import { useCommitLintPreset } from "./command/preset/commitlint";
+import { useNpmPublishPreset } from "./command/preset/npm-publish";
 import type { PreviewOptions } from "./command/preview";
 import { preview } from "./command/preview/index";
 
@@ -38,7 +39,10 @@ cli.command("preset [type]", "add preset to your project")
   .action((presetType: string) => {
     const cwd = process.cwd();
     if (presetType === "commitlint") {
-      initCommitLintPreset({ cwd });
+      useCommitLintPreset({ cwd });
+    }
+    if (presetType === "npm-publish") {
+      useNpmPublishPreset({ cwd });
     }
   });
 

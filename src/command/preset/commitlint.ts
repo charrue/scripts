@@ -21,7 +21,7 @@ const commitMessageHook = `#!/bin/sh
 
 npx --no -- commitlint --edit "\${1}"`;
 
-export const initCommitLintPreset = (options: CommitLintPresetConfig) => {
+export const useCommitLintPreset = (options: CommitLintPresetConfig) => {
   const { cwd } = options;
   const packageJsonPath = findUp("package.json", {
     cwd,

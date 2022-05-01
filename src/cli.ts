@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import cac from "cac";
+import { initCommitLintPreset } from "./command/preset/commitlint";
 import type { PreviewOptions } from "./command/preview";
 import { preview } from "./command/preview/index";
 
@@ -19,7 +20,7 @@ cli.command("preview [dist]", "locally preview production build")
     strictPort,
     base,
   }) => {
-    const pwd = process.cwd();
+    const cwd = process.cwd();
     const previewOptions: PreviewOptions = {
       open,
       port: port ?? 5555,
@@ -27,15 +28,22 @@ cli.command("preview [dist]", "locally preview production build")
       base: base ?? "/",
       outDir: dist,
       strictPort,
-      root: pwd,
+      root: cwd,
     };
 
     await preview(previewOptions);
   });
 
+cli.command("preset [type]", "add preset to your project")
+  .action((presetType: string) => {
+    const cwd = process.cwd();
+    if (presetType === "commitlint") {
+      initCommitLintPreset({ cwd });
+    }
+  });
+
 cli.help();
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
 cli.version(require("../package.json").version);
 
 cli.parse();

@@ -1,7 +1,7 @@
 {
-  "version": "0.0.1",
+  "version": "0.2.0",
   "name": "@charrue/petros",
-  "description": "",
+  "description": "🧱A command-line tool to enhance development in various processes of the project",
   "scripts": {
     "prepare": "husky install",
     "build:cli": "esbuild --minify --bundle src/cli.ts --format=cjs --platform=node --outfile=outfile.cjs",
@@ -13,13 +13,13 @@
     "petros": "outfile.cjs"
   },
   "dependencies": {
-    "@charrue/toolkit": "^0.3.0",
+    "@charrue/toolkit": "^0.5.1",
     "cac": "^6.7.12",
     "zlib": "^1.0.5"
   },
   "devDependencies": {
     "@babel/eslint-parser": "^7.16.3",
-    "@charrue/eslint-config-base": "^0.1.3",
+    "@charrue/eslint-config-base": "^0.1.5",
     "@commitlint/cli": "^15.0.0",
     "@commitlint/config-conventional": "^15.0.0",
     "@rollup/plugin-commonjs": "^21.0.1",

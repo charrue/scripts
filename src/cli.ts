@@ -5,6 +5,7 @@ import { useCommitLintPreset } from "./command/preset/commitlint";
 import { useNpmPublishPreset } from "./command/preset/npm-publish";
 import type { PreviewOptions } from "./command/preview";
 import { preview } from "./command/preview/index";
+import { startRelease } from "./command/release";
 
 const cli = cac("petros");
 
@@ -44,6 +45,12 @@ cli.command("preset [type]", "add preset to your project")
     if (presetType === "npm-publish") {
       useNpmPublishPreset({ cwd });
     }
+  });
+
+cli.command("release [version]", "release your project")
+  .action(async (version: string) => {
+    const cwd = process.cwd();
+    startRelease({ cwd, version });
   });
 
 cli.help();

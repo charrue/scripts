@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+/* eslint-disable @typescript-eslint/no-unused-vars */
 
 import cac from "cac";
 import { useCommitLintPreset } from "./command/preset/commitlint";
@@ -6,6 +6,7 @@ import { useNpmPublishPreset } from "./command/preset/npm-publish";
 import type { PreviewOptions } from "./command/preview";
 import { preview } from "./command/preview/index";
 import { startRelease } from "./command/release";
+import { getUserConfig } from "./config";
 
 const cli = cac("petros");
 
@@ -50,7 +51,9 @@ cli.command("preset [type]", "add preset to your project")
 cli.command("release [version]", "release your project")
   .action(async (version: string) => {
     const cwd = process.cwd();
-    startRelease({ cwd, version });
+    const userConfig = await getUserConfig();
+
+    await startRelease({ cwd, version }, userConfig);
   });
 
 cli.help();

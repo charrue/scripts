@@ -3,6 +3,7 @@ import semver, { ReleaseType } from "semver";
 import { prompt } from "enquirer";
 import { findUp, detectInstaller, exec } from "@charrue/toolkit/dist/node";
 import { colorizeMessage } from "@charrue/toolkit";
+import { defaultPetrosConfig, PetrosConfig } from "./../../config";
 
 const versionIncrements = [
   "patch",
@@ -11,7 +12,10 @@ const versionIncrements = [
 ];
 
 // eslint-disable-next-line max-statements
-export const startRelease = async (options: { cwd: string; version: string }) => {
+export const startRelease = async (
+  options: { cwd: string; version: string },
+  customConfig: PetrosConfig = defaultPetrosConfig,
+) => {
   let { version: targetVersion } = options;
   const { cwd } = options;
   const packageJson = findUp("package.json", { cwd, type: "file" });
@@ -59,8 +63,52 @@ export const startRelease = async (options: { cwd: string; version: string }) =>
   if (!yes) {
     return;
   }
-  // console.log(colorizeMessage("\nRunning tests..."));
-  // exec(`${installer} run test`, cwd);
+
+  const resetPackageVersion = () => {
+    // 恢复原来的版本
+    writeFileSync(
+      packageJson,
+      JSON.stringify(packageJsonContent, null, 2),
+    );
+  };
+
+  const testScript = typeof customConfig?.release?.test === "string" ? customConfig.release.test : "test";
+  if (customConfig?.release?.test && packageJsonContent.scripts[testScript]) {
+    console.log(colorizeMessage("\nRunning tests..."));
+    try {
+      exec(`${installer} run ${testScript}`, cwd);
+    } catch (e: any) {
+      console.log(colorizeMessage(`\n${e.message}`, "error"));
+      throw e;
+    }
+  }
+
+  const buildScript = typeof customConfig?.release?.build === "string" ? customConfig.release.build : "build";
+  if (customConfig?.release?.build && packageJsonContent.scripts[buildScript]) {
+    console.log(colorizeMessage("\nBuilding package..."));
+    try {
+      exec(`${installer} run ${buildScript}`, cwd);
+    } catch (e: any) {
+      console.log(colorizeMessage(`\n${e.message}`, "error"));
+      throw e;
+    }
+  }
+
+  const changelogScript = typeof customConfig?.release?.changelog === "string" ? customConfig.release.changelog : "changelog";
+  if (customConfig?.release?.changelog && packageJsonContent.scripts[changelogScript]) {
+    console.log(colorizeMessage("\nGenerating changelog..."));
+    try {
+      exec(`${installer} run ${changelogScript}`, cwd);
+    } catch (e: any) {
+      console.log(colorizeMessage(`\n${e.message}`, "error"));
+      throw e;
+    }
+  }
+
+  if (customConfig?.release?.updateLockfile) {
+    console.log(colorizeMessage("\nUpdating lockfile..."));
+    exec(`${installer} install --prefer-offline`, cwd);
+  }
 
   console.log(colorizeMessage("\nUpdating package version..."));
   writeFileSync(
@@ -71,47 +119,38 @@ export const startRelease = async (options: { cwd: string; version: string }) =>
     }, null, 2),
   );
 
-  console.log(colorizeMessage("\nBuilding package..."));
-  exec(`${installer} run build`, cwd);
-
-  console.log(colorizeMessage("\nGenerating changelog..."));
-  exec(`${installer} run changelog`, cwd);
-
-  console.log(colorizeMessage("\nUpdating lockfile..."));
-  exec(`${installer} install --prefer-offline`, cwd);
-
-  const outputMessage = exec("git diff");
-  if (outputMessage) {
-    console.log(colorizeMessage("\nCommitting changes..."));
-    try {
-      exec("git add -A");
-      exec(`git commit -m "build\: v${targetVersion}"`, cwd);
-    } catch (e: any) {
-      // 恢复原来的版本
-      writeFileSync(
-        packageJson,
-        JSON.stringify(packageJsonContent, null, 2),
-      );
-      console.log(colorizeMessage(e.message, "error"));
+  if (customConfig?.release?.saveCommit) {
+    const outputMessage = exec("git diff");
+    if (outputMessage) {
+      console.log(colorizeMessage("\nCommitting changes..."));
+      try {
+        exec("git add -A");
+        exec(`git commit -m "build\: v${targetVersion}"`, cwd);
+      } catch (e: any) {
+        resetPackageVersion();
+        console.log(colorizeMessage(e.message, "error"));
+        throw e;
+      }
+    } else {
+      console.log(colorizeMessage("No changes to commit."));
     }
-  } else {
-    console.log(colorizeMessage("No changes to commit."));
   }
 
-  console.log(colorizeMessage(`\nPublishing package ${packageName}...`));
-  try {
-    exec(`${installer} publish --new-version ${targetVersion} --access=public`, cwd);
-    console.log(colorizeMessage(`Successfully published ${packageName}@${targetVersion}`));
-  } catch (e: any) {
-    if (e.stderr?.match(/previously published/)) {
-      console.log(colorizeMessage(`Skipping already published: ${packageName}`));
-    } else {
+  if (customConfig?.release?.publish) {
+    console.log(colorizeMessage(`\nPublishing package ${packageName}...`));
+    try {
+      exec(`${installer} publish --access=public`, cwd);
+      console.log(colorizeMessage(`Successfully published ${packageName}@${targetVersion}`));
+    } catch (e: any) {
+      console.log(colorizeMessage(`\n${e.message}`, "error"));
       throw e;
     }
   }
 
-  console.log(colorizeMessage("\nPushing to remote..."));
-  exec(`git tag v${targetVersion}`, cwd);
-  exec(`git push origin refs/tags/v${targetVersion}`, cwd);
-  exec(`git push`, cwd);
+  if (customConfig?.release?.push) {
+    console.log(colorizeMessage("\nPushing to remote..."));
+    exec(`git tag v${targetVersion}`, cwd);
+    exec(`git push origin refs/tags/v${targetVersion}`, cwd);
+    exec(`git push`, cwd);
+  }
 };

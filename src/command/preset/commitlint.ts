@@ -27,13 +27,15 @@ export const useCommitLintPreset = (options: CommitLintPresetConfig) => {
     cwd,
     type: "file",
   });
-  const rootPath = resolve(cwd, "..");
-  const huskyDir = resolve(rootPath, "husky");
+  const rootPath = resolve(packageJsonPath, "..");
+  const huskyDir = resolve(rootPath, ".husky");
   const commitlintConfigFilePath = resolve(rootPath, "commitlint.config.js");
-  // 1. 添加 commitlint 配置
+
+  console.log(colorizeMessage("set changelog npm script", "info"));
   exec(`npm set-script changelog "conventional-changelog -p angular -i CHANGELOG.md -s"`);
 
   if (!existsSync(commitlintConfigFilePath)) {
+    console.log(colorizeMessage("write config to commitlint.config.js", "info"));
     writeFileSync(
       commitlintConfigFilePath,
       `module.exports = {extends: ['@commitlint/config-conventional']}`,
@@ -43,11 +45,14 @@ export const useCommitLintPreset = (options: CommitLintPresetConfig) => {
     );
   }
 
-  // 2. 添加 husky 配置
+  console.log(colorizeMessage("set husky npm script", "info"));
   exec(`npm set-script prepare "husky install"`);
   if (!existsSync(huskyDir)) {
+    console.log(colorizeMessage("create .husky directory", "info"));
     mkdirSync(huskyDir);
   }
+
+  console.log(colorizeMessage("write config to .husky", "info"));
   writeFileSync(
     resolve(huskyDir, "commit-msg"),
     commitMessageHook,
@@ -56,7 +61,7 @@ export const useCommitLintPreset = (options: CommitLintPresetConfig) => {
     },
   );
 
-  // 3. package.json写入依赖项
+  console.log(colorizeMessage("write dependencies to package.json", "info"));
   const packageJSON = require(packageJsonPath);
   if (!packageJSON.devDependencies) {
     packageJSON.devDependencies = {};
@@ -79,8 +84,7 @@ export const useCommitLintPreset = (options: CommitLintPresetConfig) => {
     JSON.stringify(packageJSON, null, 2),
   );
 
-  // 4. package.json格式美化
-  console.log(colorizeMessage("sort package.json task start ...", "info"));
+  console.log(colorizeMessage("sort package.json ...", "info"));
   exec("npx sort-package-json");
-  console.log(colorizeMessage("sort package.json task end !", "info"));
+  console.log(colorizeMessage("done!", "success"));
 };

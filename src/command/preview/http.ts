@@ -74,7 +74,7 @@ export const httpServerStart = (
   });
 });
 
-export function resolveHostname(optionsHost: string | boolean | undefined) {
+export const resolveHostname = (optionsHost: string | boolean | undefined) => {
   // eslint-disable-next-line init-declarations
   let host: string | undefined;
   if (optionsHost === undefined || optionsHost === false) {
@@ -93,4 +93,4 @@ export function resolveHostname(optionsHost: string | boolean | undefined) {
     : host;
 
   return { host, name };
-}
+};

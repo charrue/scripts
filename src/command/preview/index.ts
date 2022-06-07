@@ -1,3 +1,4 @@
+import { statSync } from "fs";
 import { resolve } from "path";
 import sirv from "sirv";
 import connect from "connect";
@@ -22,6 +23,23 @@ export interface PreviewOptions {
   strictPort?: boolean;
 }
 
+const createPreviewService = (base: string, dir: string) => {
+  const app = connect();
+  app.use(corsMiddleware({}));
+  app.use(compression());
+
+  app.use(
+    base,
+    sirv(dir, {
+      etag: true,
+      dev: true,
+      single: true,
+    }),
+  );
+  const httpServer = createHttpServer(app);
+  return httpServer;
+};
+
 export const preview = async (config: PreviewOptions) => {
   const {
     base,
@@ -33,29 +51,22 @@ export const preview = async (config: PreviewOptions) => {
     strictPort,
   } = config;
 
-  const distDir = resolve(root, outDir);
-  const app = connect();
-  app.use(corsMiddleware({}));
-  app.use(compression());
+  let distDir = resolve(root, outDir);
 
-  app.use(
-    base,
-    sirv(distDir, {
-      etag: true,
-      dev: true,
-      single: true,
-    }),
-  );
-  const httpServer = createHttpServer(app);
+  if (!statSync(distDir).isDirectory()) {
+    const distDirParent = resolve(distDir, "..");
+    console.warn(`[petros] preview directory ${distDir} should be a directory, but it is not.\nnow set preview directory to ${distDirParent}`);
+    distDir = distDirParent;
+  }
 
-  const defaultPort = port;
+  const httpServer = createPreviewService(base, distDir);
   const protocol = "http";
   const hostname = resolveHostname(host);
   const logger = createLogger();
 
   try {
     const serverPort = await httpServerStart(httpServer, {
-      port: defaultPort,
+      port,
       strictPort,
       host: hostname.name,
       logger,
@@ -63,11 +74,9 @@ export const preview = async (config: PreviewOptions) => {
 
     if (open) {
       const openUrl = typeof open === "string" ? open : base;
-      openBrowser(
-        openUrl.startsWith("http")
-          ? openUrl
-          : `${protocol}://${hostname.name}:${serverPort}${openUrl}`,
-      );
+      openBrowser(openUrl.startsWith("http")
+        ? openUrl
+        : `${protocol}://${hostname.name}:${serverPort}${openUrl}`);
     }
 
     printServerUrls(httpServer, {
@@ -77,9 +86,7 @@ export const preview = async (config: PreviewOptions) => {
       base,
     });
   } catch (e: any) {
-    logger.error(
-      red(`error when starting preview server:\n${e.stack}`),
-    );
+    logger.error(red(`error when starting preview server:\n${e.stack}`));
     process.exit(1);
   }
 };

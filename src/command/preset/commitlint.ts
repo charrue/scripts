@@ -70,6 +70,7 @@ export const useCommitLintPreset = (options: CommitLintPresetConfig) => {
     ...packageJSON.devDependencies,
     "@commitlint/cli": "^16.2.4",
     "@commitlint/config-conventional": "^16.2.4",
+    "cz-conventional-changelog": "^3.3.0",
     commitizen: "^4.2.4",
     "conventional-changelog-cli": "^2.2.2",
     husky: "^7.0.4",

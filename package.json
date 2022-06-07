@@ -1,11 +1,10 @@
 {
-  "version": "0.6.1",
+  "version": "0.6.2",
   "name": "@charrue/petros",
   "description": "🧱A command-line tool to enhance development in various processes of the project",
   "scripts": {
     "prepare": "husky install",
     "build": "rollup -c",
-    "build:cli": "esbuild --bundle src/cli.ts --format=cjs --platform=node --outfile=outfile.cjs",
     "lint": "eslint --fix",
     "test": "vitest",
     "changelog": "conventional-changelog -p angular -i CHANGELOG.md -s"
@@ -74,8 +73,8 @@
     "cli"
   ],
   "files": [
+    "bin",
     "dist",
-    "outfile.cjs",
     "README.md"
   ],
   "license": "MIT"

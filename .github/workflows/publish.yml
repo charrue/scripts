@@ -27,6 +27,7 @@ jobs:
           cache: 'pnpm'
 
       - run: pnpm install
+      - run: pnpm run build
 
       - run: pnpm publish --access=public
         env:

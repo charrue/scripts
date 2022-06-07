@@ -1,5 +1,5 @@
 {
-  "version": "0.6.2",
+  "version": "0.6.3",
   "name": "@charrue/petros",
   "description": "🧱A command-line tool to enhance development in various processes of the project",
   "scripts": {
